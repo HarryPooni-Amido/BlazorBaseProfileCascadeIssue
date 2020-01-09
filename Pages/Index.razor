@@ -1,0 +1,60 @@
+﻿@page "/"
+@using BlazorBaseProfileCascade.Data
+
+
+    <EditForm Model="profile" OnValidSubmit="CreateNewProfile">
+
+        <form>
+            <div class="container-fluid">
+                <div class="form-row">
+                    <div class="col">
+                        <DynamicListControl @bind-Values="@profile.BaTechniques"  AddItem="@(item => profile.BaTechniques.Add(item))" RemoveItem="@(item => profile.BaTechniques.Remove(item))"></DynamicListControl>
+                    </div>
+                    <div class="col">
+                        <DynamicListControl @bind-Values="@profile.Certifications"  AddItem="@(item => profile.Certifications.Add(item))" RemoveItem="@(item => profile.Certifications.Remove(item))"></DynamicListControl>
+                    </div>
+                    <div class="col">
+                        <DynamicListControl @bind-Values="@profile.Tools"  AddItem="@(item => profile.Tools.Add(item))" RemoveItem="@(item => profile.Tools.Remove(item))"></DynamicListControl>
+                    </div>
+                    <div class="col">
+                        <DynamicListControl @bind-Values="@profile.UxAndDesign"  AddItem="@(item => profile.UxAndDesign.Add(item))" RemoveItem="@(item => profile.UxAndDesign.Remove(item))"></DynamicListControl>
+                    </div>
+                </div>
+
+                <BaseProfileControl @bind-Value="@baseProfile"></BaseProfileControl>
+                <p><button type="submit">Submit</button></p>
+            </div>
+        </form>
+    </EditForm>
+
+@code
+{
+    
+    [CascadingParameter]
+    protected EditContext EditContext { get; set; }
+
+    public CandidateProfile profile { get; set; } = new CandidateProfile();
+
+    
+    public CandidateProfileBase baseProfile
+    {
+        get => profile;
+        set
+        {
+            profile.Expertise = value.Expertise;
+            profile.Strengths = value.Strengths;
+            profile.Summary = value.Summary;
+        }
+    }
+
+    protected override Task OnInitializedAsync()
+    {
+        profile.EmailAddress = "user@test.com";
+        return base.OnInitializedAsync();
+    }
+
+    void CreateNewProfile()
+    {
+        Console.WriteLine("TODO: Actually do something with the valid data");
+    }
+}

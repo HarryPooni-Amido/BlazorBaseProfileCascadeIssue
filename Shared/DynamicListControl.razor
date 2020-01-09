@@ -1,0 +1,72 @@
+﻿@using System.Linq.Expressions
+
+<div>
+    <input type="text" @bind="@NewItem" name="inpAddItem" />
+    <button class="btn btn-link" @onclick="@(() => AddItemToList())">Add @FieldIdentifier.FieldName</button>
+    @if (Values != null && Values.Any())
+    {
+        <ul>
+            @foreach (var item in Values)
+            {
+                <li>@item <button class="btn btn-link" @onclick="@(() => RemoveItemToList(item))">Remove</button></li>
+            }
+        </ul>
+    }
+</div>
+
+@code {
+
+    [Parameter]
+    public IList<string> Values { get; set; }
+
+    protected string NewItem { get; set; } = String.Empty;
+
+    [Parameter]
+    public FieldIdentifier FieldIdentifier { get; set; }
+
+    [Parameter]
+    public Expression<Func<IList<string>>> ValuesExpression { get; set; }
+
+    [Parameter]
+    public EventCallback<IList<string>> ValuesChanged { get; set; }
+
+    [Parameter]
+    public Action<string> RemoveItem { get; set; }
+
+    [Parameter]
+    public Action<string> AddItem { get; set; }
+
+    [CascadingParameter]
+    protected EditContext EditContext { get; set; }
+
+    protected async void AddItemToList()
+    {
+        if (string.IsNullOrWhiteSpace(NewItem))
+            return;
+
+        AddItem(NewItem);
+
+        await ValuesChanged.InvokeAsync(Values);
+        EditContext?.NotifyFieldChanged(FieldIdentifier);
+
+        NewItem = String.Empty;
+    }
+
+    protected async void RemoveItemToList(string item)
+    {
+        RemoveItem(item);
+        await ValuesChanged.InvokeAsync(Values);
+        EditContext?.NotifyFieldChanged(FieldIdentifier);
+    }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        if (Values == null)
+            throw new InvalidOperationException($"{GetType()} requires a {nameof(Values)} parameter.");
+
+        if (FieldIdentifier.Equals(default))
+            FieldIdentifier = FieldIdentifier.Create(ValuesExpression);
+    }
+}
